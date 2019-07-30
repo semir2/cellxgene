@@ -294,30 +294,36 @@ class Graph extends React.Component {
         .select("#centroid-container")
         .remove();
 
-      if (centroidLabel.metadataField === "" || !centroidLabel.centroidXY) {
+      if (centroidLabel.labeledCategory === "" || !centroidLabel.labels) {
         return;
       }
 
-      const centroidScreen = this.mapPointToScreen(centroidLabel.centroidXY);
+      const copy = [...centroidLabel.labels];
+
+      for (let i = 0, { length } = centroidLabel.labels; i < length; i += 1) {
+        copy[i] = [
+          copy[i][0],
+          ...this.mapPointToScreen([copy[i][1], copy[i][2]])
+        ];
+      }
 
       const newCentroidSVG = setupCentroidSVG(
         responsive,
         this.graphPaddingRight,
-        centroidScreen,
-        centroidLabel.categoryField,
+        copy,
         colorAccessor
       );
 
       stateChanges = { ...stateChanges, centroidSVG: newCentroidSVG };
     };
 
-    // Centroid SVG creation is disabled for now but should go into the first and third cases if enabled
     if (
       prevProps.responsive.height !== responsive.height ||
       prevProps.responsive.width !== responsive.width
     ) {
       // If the window size has changed we want to recreate all SVGs
       createToolSVG();
+      createCentroidSVG();
     } else if (
       (responsive.height && responsive.width && !toolSVG) ||
       selectionTool !== prevProps.selectionTool ||
@@ -330,6 +336,7 @@ class Graph extends React.Component {
       (responsive.height && responsive.width && !centroidSVG)
     ) {
       // First time for centroid or label change
+      createCentroidSVG();
     }
 
     /*
