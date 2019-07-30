@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 import { connect } from "react-redux";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
-import { Button, Tooltip } from "@blueprintjs/core";
+import { Button, Tooltip, ButtonGroup } from "@blueprintjs/core";
 
 import * as globals from "../../globals";
 import Value from "./value";
@@ -10,7 +10,8 @@ import sortedCategoryValues from "./util";
 
 @connect(state => ({
   colorAccessor: state.colors.colorAccessor,
-  categoricalSelection: state.categoricalSelection
+  categoricalSelection: state.categoricalSelection,
+  labeledCategory: state.centroidLabel.labeledCategory
 }))
 class Category extends React.Component {
   constructor(props) {
@@ -56,6 +57,14 @@ class Category extends React.Component {
     dispatch({
       type: "color by categorical metadata",
       colorAccessor: metadataField
+    });
+  };
+
+  handleCentroidChange = () => {
+    const { dispatch, metadataField } = this.props;
+    dispatch({
+      type: "show centroid labels for category",
+      metadataField
     });
   };
 
@@ -105,7 +114,12 @@ class Category extends React.Component {
 
   render() {
     const { isExpanded, isChecked } = this.state;
-    const { metadataField, colorAccessor, categoricalSelection } = this.props;
+    const {
+      metadataField,
+      colorAccessor,
+      categoricalSelection,
+      labeledCategory
+    } = this.props;
     const { isTruncated } = categoricalSelection[metadataField];
     return (
       <div
@@ -169,16 +183,29 @@ class Category extends React.Component {
               )}
             </span>
           </div>
-          <Tooltip content="Use as color scale" position="bottom">
-            <Button
-              data-testclass="colorby"
-              data-testid={`colorby-${metadataField}`}
-              onClick={this.handleColorChange}
-              active={colorAccessor === metadataField}
-              intent={colorAccessor === metadataField ? "primary" : "none"}
-              icon="tint"
-            />
-          </Tooltip>
+          <ButtonGroup>
+            <Tooltip
+              content="View the centroids for all values"
+              position="bottom"
+            >
+              <Button
+                icon="numbered-list"
+                onClick={this.handleCentroidChange}
+                active={labeledCategory === metadataField}
+                intent={labeledCategory === metadataField ? "primary" : "none"}
+              />
+            </Tooltip>
+            <Tooltip content="Use as color scale" position="bottom">
+              <Button
+                data-testclass="colorby"
+                data-testid={`colorby-${metadataField}`}
+                onClick={this.handleColorChange}
+                active={colorAccessor === metadataField}
+                intent={colorAccessor === metadataField ? "primary" : "none"}
+                icon="tint"
+              />
+            </Tooltip>
+          </ButtonGroup>
         </div>
         <div style={{ marginLeft: 26 }}>
           {isExpanded ? this.renderCategoryItems() : null}
