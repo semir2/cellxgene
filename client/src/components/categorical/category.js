@@ -11,7 +11,8 @@ import sortedCategoryValues from "./util";
 @connect(state => ({
   colorAccessor: state.colors.colorAccessor,
   categoricalSelection: state.categoricalSelection,
-  labeledCategory: state.centroidLabel.labeledCategory
+  labeledCategory: state.centroidLabel.labeledCategory,
+  graphInteractionMode: state.controls.graphInteractionMode
 }))
 class Category extends React.Component {
   constructor(props) {
@@ -118,9 +119,11 @@ class Category extends React.Component {
       metadataField,
       colorAccessor,
       categoricalSelection,
-      labeledCategory
+      labeledCategory,
+      graphInteractionMode
     } = this.props;
     const { isTruncated } = categoricalSelection[metadataField];
+
     return (
       <div
         style={{
@@ -187,12 +190,14 @@ class Category extends React.Component {
             <Tooltip
               content="View the centroids for all values"
               position="bottom"
+              disabled={graphInteractionMode === "zoom"}
             >
               <Button
                 icon="numbered-list"
                 onClick={this.handleCentroidChange}
                 active={labeledCategory === metadataField}
                 intent={labeledCategory === metadataField ? "primary" : "none"}
+                disabled={graphInteractionMode === "zoom"}
               />
             </Tooltip>
             <Tooltip content="Use as color scale" position="bottom">

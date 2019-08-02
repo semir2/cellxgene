@@ -294,7 +294,11 @@ class Graph extends React.Component {
         .select("#centroid-container")
         .remove();
 
-      if (centroidLabel.labeledCategory === "" || !centroidLabel.labels) {
+      if (
+        centroidLabel.labeledCategory === "" ||
+        !centroidLabel.labels ||
+        graphInteractionMode === "zoom"
+      ) {
         return;
       }
 
@@ -329,11 +333,13 @@ class Graph extends React.Component {
       createCentroidSVG();
     } else if (
       (responsive.height && responsive.width && !toolSVG) ||
-      selectionTool !== prevProps.selectionTool ||
-      prevProps.graphInteractionMode !== graphInteractionMode
+      selectionTool !== prevProps.selectionTool
     ) {
       // first time or change of selection tool6
       createToolSVG();
+    } else if (prevProps.graphInteractionMode !== graphInteractionMode) {
+      createToolSVG();
+      createCentroidSVG();
     } else if (
       centroidLabel !== prevProps.centroidLabel ||
       (responsive.height && responsive.width && !centroidSVG)
