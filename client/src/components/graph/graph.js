@@ -174,7 +174,7 @@ class Graph extends React.Component {
       colorAccessor,
       centroidLabel
     } = this.props;
-    const { reglRender, mode, regl, toolSVG, centroidSVG } = this.state;
+    const { reglRender, regl, toolSVG, centroidSVG } = this.state;
     let stateChanges = {};
 
     if (reglRender) {
@@ -290,7 +290,7 @@ class Graph extends React.Component {
     };
 
     const createCentroidSVG = (
-      viewportChange = true /* this should be defaulted to false
+      viewportChange = false /* this should be defaulted to false
       , but leaving it like this utill I find out how to fix */
     ) => {
       // Remove pre-existing SVG layer
@@ -319,7 +319,7 @@ class Graph extends React.Component {
         const value = pair[1];
         // If the screen coordinates haven't been calculated
         // or if the viewport has changed
-        if (value.length > 2 || viewportChange) {
+        if (value.length < 3 || viewportChange) {
           // replace indicies 2 and 3 with screen calculated coordinates
           value.splice(2, 2, ...this.mapPointToScreen([value[0], value[1]]));
         }
@@ -353,7 +353,8 @@ class Graph extends React.Component {
     } else if (prevProps.graphInteractionMode !== graphInteractionMode) {
       // If lasso/zoom is switched
       createToolSVG();
-      createCentroidSVG();
+      // if we just switched from zoom, lets assume that the camera changed
+      createCentroidSVG(prevProps.graphInteractionMode === "zoom");
     } else if (
       centroidLabel !== prevProps.centroidLabel ||
       (responsive.height && responsive.width && !centroidSVG)
