@@ -11,7 +11,7 @@ import sortedCategoryValues from "./util";
 @connect(state => ({
   colorAccessor: state.colors.colorAccessor,
   categoricalSelection: state.categoricalSelection,
-  labeledCategory: state.centroidLabel.labeledCategory,
+  labeledCategory: state.centroidLabels.labeledCategory,
   graphInteractionMode: state.controls.graphInteractionMode
 }))
 class Category extends React.Component {
