@@ -56,7 +56,7 @@ const calcMedianCentroid = (
       categoryName
     ].categoryValueIndices.get(categoryValue);
 
-    if (categoryValueIndex) {
+    if (categoryValueIndex !== undefined) {
       // Get the number of cells which are in the category value
       const numInCategoryValue =
         categoricalSelection[categoryName].categoryValueCounts[
