@@ -46,6 +46,7 @@ const Reducer = undoable(
     "graphSelection",
     "crossfilter",
     "colors",
+    "centroidLabels",
     "controls",
     "differential",
     "layoutChoice"
