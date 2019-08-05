@@ -17,6 +17,7 @@ import responsive from "./responsive";
 import controls from "./controls";
 import resetCache from "./resetCache";
 import centroidLabels from "./centroidLabels";
+import pointDialation from "./pointDilation";
 
 import undoableConfig from "./undoableConfig";
 
@@ -35,6 +36,7 @@ const Reducer = undoable(
     ["differential", differential],
     ["responsive", responsive],
     ["centroidLabels", centroidLabels],
+    ["pointDilation", pointDialation],
     ["resetCache", resetCache]
   ]),
   [
