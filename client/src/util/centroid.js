@@ -44,6 +44,11 @@ const calcMedianCentroid = (
   const layoutYArray = world.obsLayout.col(layoutDimNames[1]).asArray();
   const coordinates = new Map();
 
+  let minX = layoutXArray[0];
+  let maxX = layoutXArray[0];
+  let minY = layoutYArray[0];
+  let maxY = layoutYArray[0];
+
   // Iterate over all the cells in the category
   for (let i = 0, len = categoryArray.length; i < len; i += 1) {
     const categoryValue = categoryArray[i];
@@ -74,6 +79,9 @@ const calcMedianCentroid = (
       const index = valueArray[1];
       let hasFinite = valueArray[0];
 
+      const xValue = layoutXArray[i];
+      const yValue = layoutYArray[i];
+
       hasFinite =
         Number.isFinite(layoutXArray[i]) && Number.isFinite(layoutYArray[i])
           ? true
@@ -82,6 +90,17 @@ const calcMedianCentroid = (
       valueArray[1] = index + 1;
       valueArray[2][index] = layoutXArray[i];
       valueArray[3][index] = layoutYArray[i];
+
+      if (minX > xValue) {
+        minX = xValue;
+      } else if (maxX < xValue) {
+        maxX = xValue;
+      }
+      if (minY > yValue) {
+        minY = yValue;
+      } else if (maxY < yValue) {
+        maxY = yValue;
+      }
 
       coordinates.set(categoryValue, valueArray);
     }
@@ -102,9 +121,37 @@ const calcMedianCentroid = (
       // and insert them into the first two indices
       value[0] = quantile([0.5], value[2])[0];
       value[1] = quantile([0.5], value[3])[0];
+
+      let nInside = 0;
+
+      const radius =
+        (value[2].length / world.nObs) * Math.max(maxX - minX, maxY - minY);
+
+      for (let i = 0, { length } = value[2]; i < length; i += 1) {
+        if (
+          Math.sqrt(
+            (value[2][i] - value[0]) * (value[2][i] - value[0]) +
+              (value[3][i] - value[1]) * (value[2][3] - value[1])
+          ) < radius
+        ) {
+          nInside += 1;
+        }
+      }
+
+      value[4] = 0;
+      value[5] = radius * 0.5;
+
+      value[6] = (nInside / value[2].length) * 100 < 7.5;
+
+      if (value[6]) {
+        console.log(
+          `${key} WARNING LESS THAN 10% (${(nInside / value[2].length) * 100})`
+        );
+      }
+
       // Remove the last two elements (where the arrays of coordinates were)
-      value.pop();
-      value.pop();
+      // value.pop();
+      // value.pop();
     } else {
       // remove the entry if not
       coordinates.delete(key);

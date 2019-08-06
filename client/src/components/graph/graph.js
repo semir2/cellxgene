@@ -321,9 +321,14 @@ class Graph extends React.Component {
         const value = pair[1];
         // If the screen coordinates haven't been calculated
         // or if the viewport has changed
-        if (value.length < 3 || viewportChange) {
+        if (true /* value.length < 3  */ || viewportChange) {
           // replace indicies 2 and 3 with screen calculated coordinates
           value.splice(2, 2, ...this.mapPointToScreen([value[0], value[1]]));
+
+          // this is temp just to see calculation circle
+
+          value.push(...this.mapPointToScreen([value[4], value[4]]));
+          value.push(...this.mapPointToScreen([value[4], value[5]]));
         }
         // Iterate
         pair = iter.next().value;

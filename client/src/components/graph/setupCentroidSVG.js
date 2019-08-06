@@ -39,6 +39,17 @@ export default (responsive, graphPaddingRight, labels) => {
       .style("font-family", "Roboto Condensed")
       .style("font-size", "12px")
       .style("fill", "black");
+
+    // temp to look at circle
+
+    svg
+      .append("circle")
+      .attr("cx", value[2])
+      .attr("cy", value[3])
+      .attr("r", value[8] - value[10])
+      .style("stroke-width", "2")
+      .style("stroke", value[6] ? "red" : "black");
+
     pair = iter.next().value;
   }
 
