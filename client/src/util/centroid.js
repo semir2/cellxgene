@@ -145,7 +145,7 @@ const calcMedianCentroid = (
 
       if (value[6]) {
         console.log(
-          `${key} WARNING LESS THAN 10% (${(nInside / value[2].length) * 100})`
+          `${key} WARNING LESS THAN 7.5% (${(nInside / value[2].length) * 100})`
         );
       }
 
