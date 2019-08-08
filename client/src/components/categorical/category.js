@@ -61,14 +61,6 @@ class Category extends React.Component {
     });
   };
 
-  handleCentroidChange = () => {
-    const { dispatch, metadataField } = this.props;
-    dispatch({
-      type: "show centroid labels for category",
-      metadataField
-    });
-  };
-
   toggleAll() {
     const { dispatch, metadataField } = this.props;
     dispatch({
@@ -186,31 +178,16 @@ class Category extends React.Component {
               )}
             </span>
           </div>
-          <ButtonGroup>
-            <Tooltip
-              content="View the centroids for all values"
-              position="bottom"
-              disabled={graphInteractionMode === "zoom"}
-            >
-              <Button
-                icon="property"
-                onClick={this.handleCentroidChange}
-                active={labeledCategory === metadataField}
-                intent={labeledCategory === metadataField ? "primary" : "none"}
-                disabled={graphInteractionMode === "zoom"}
-              />
-            </Tooltip>
-            <Tooltip content="Use as color scale" position="bottom">
-              <Button
-                data-testclass="colorby"
-                data-testid={`colorby-${metadataField}`}
-                onClick={this.handleColorChange}
-                active={colorAccessor === metadataField}
-                intent={colorAccessor === metadataField ? "primary" : "none"}
-                icon="tint"
-              />
-            </Tooltip>
-          </ButtonGroup>
+          <Tooltip content="Use as color scale" position="bottom">
+            <Button
+              data-testclass="colorby"
+              data-testid={`colorby-${metadataField}`}
+              onClick={this.handleColorChange}
+              active={colorAccessor === metadataField}
+              intent={colorAccessor === metadataField ? "primary" : "none"}
+              icon="tint"
+            />
+          </Tooltip>
         </div>
         <div style={{ marginLeft: 26 }}>
           {isExpanded ? this.renderCategoryItems() : null}
