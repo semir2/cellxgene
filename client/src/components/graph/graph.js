@@ -173,7 +173,8 @@ class Graph extends React.Component {
       layoutChoice,
       graphInteractionMode,
       centroidLabels,
-      pointDilation
+      pointDilation,
+      colorAccessor
     } = this.props;
     const { reglRender, regl, toolSVG, centroidSVG } = this.state;
     let stateChanges = {};
@@ -303,8 +304,8 @@ class Graph extends React.Component {
       // If there is no currently selected cateogry for viewing
       // Or if the graph is currently in zoom/pan mode
       if (
-        centroidLabels.labeledCategory === "" ||
-        !centroidLabels.labels ||
+        !colorAccessor ||
+        centroidLabels.labels.length === 0 ||
         graphInteractionMode === "zoom"
       ) {
         // Return without redrawing the svg layer
