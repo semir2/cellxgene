@@ -1,7 +1,13 @@
 import * as d3 from "d3";
 import styles from "./graph.css";
 
-export default (responsive, graphPaddingRight, labels) => {
+export default (
+  responsive,
+  graphPaddingRight,
+  labels,
+  handleMouseEnter,
+  handleMouseExit
+) => {
   const containerWidth = responsive.width - graphPaddingRight;
 
   const svg = d3
@@ -27,6 +33,9 @@ export default (responsive, graphPaddingRight, labels) => {
       .append("g")
       .attr("class", "centroid-label")
       .attr("transform", `translate(${value[2]}, ${value[3]})`)
+      .datum({ key })
+      .on("mouseover", handleMouseEnter)
+      .on("mouseout", handleMouseExit);
     // And the key as the text
     label
       .append("text")
@@ -39,13 +48,13 @@ export default (responsive, graphPaddingRight, labels) => {
 
     // temp to look at circle
 
-    svg
+    /* svg
       .append("circle")
       .attr("cx", value[2])
       .attr("cy", value[3])
       .attr("r", value[8] - value[10])
       .style("stroke-width", "2")
-      .style("stroke", value[6] ? "red" : "black");
+      .style("stroke", value[6] ? "red" : "black"); */
 
     pair = iter.next().value;
   }
