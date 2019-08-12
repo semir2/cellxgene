@@ -104,13 +104,24 @@ class Graph extends React.Component {
       toolSVG: null,
       centroidSVG: null,
       tool: null,
-      container: null
+      container: null,
+      cameraUpdate: 0
     };
   }
 
   componentDidMount() {
     // setup canvas and camera
-    const camera = _camera(this.reglCanvas, { scale: true, rotate: false });
+    const camera = _camera(
+      this.reglCanvas,
+      { scale: true, rotate: false },
+      () => {
+        this.setState(state => {
+          return {
+            cameraUpdate: state.cameraUpdate + 1
+          };
+        });
+      }
+    );
     const regl = _regl(this.reglCanvas);
 
     const drawPoints = _drawPoints(regl);
@@ -161,7 +172,7 @@ class Graph extends React.Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { renderCache } = this;
     const {
       world,
@@ -177,8 +188,86 @@ class Graph extends React.Component {
       colorAccessor,
       dispatch
     } = this.props;
-    const { reglRender, regl, toolSVG, centroidSVG } = this.state;
+    const { reglRender, regl, toolSVG, centroidSVG, cameraUpdate } = this.state;
     let stateChanges = {};
+
+    const createCentroidSVG = (
+      viewportChange = false /* this should be defaulted to false
+      , but leaving it like this utill I find out how to fix */
+    ) => {
+      // Remove pre-existing SVG layer
+      d3.select("#graphAttachPoint")
+        .select("svg")
+        .style("background", null)
+        .selectAll(".centroid-label")
+        .remove();
+
+      // If there is no currently selected cateogry for viewing
+      // Or if the graph is currently in zoom/pan mode
+      if (
+        !colorAccessor ||
+        centroidLabels.labels.length ===
+          0 /* ||
+        graphInteractionMode === "zoom" */
+      ) {
+        // Return without redrawing the svg layer
+        return;
+      }
+
+      // Iterate over all the key-value pairs in labels
+      // key value pair looks like:
+      // categoryValue -> [layoutX, layoutY, calculatedScreenX, calculatedScreenY]
+      const iter = centroidLabels.labels.entries();
+      let pair = iter.next().value;
+      // While there are pairs
+      while (pair) {
+        const value = pair[1];
+        // If the screen coordinates haven't been calculated
+        // or if the viewport has changed
+
+        if (
+          value.length < 8 ||
+          false /* value.length < 3  */ ||
+          viewportChange
+        ) {
+          // replace indicies 2 and 3 with screen calculated coordinates
+          value.splice(2, 2, ...this.mapPointToScreen([value[0], value[1]]));
+
+          // this is temp just to see calculation circle
+
+          value.push(...this.mapPointToScreen([value[4], value[4]]));
+          value.push(...this.mapPointToScreen([value[4], value[5]]));
+        }
+        // Iterate
+        pair = iter.next().value;
+      }
+
+      const handleMouseEnter = d => {
+        dispatch({
+          type: "category value mouse hover start",
+          metadataField: colorAccessor,
+          categoryField: d.key
+        });
+      };
+
+      const handleMouseExit = d => {
+        dispatch({
+          type: "category value mouse hover end",
+          metadataField: colorAccessor,
+          categoryField: d.key
+        });
+      };
+
+      const newCentroidSVG = setupCentroidSVG(
+        responsive,
+        this.graphPaddingRight,
+        centroidLabels.labels,
+        handleMouseEnter,
+        handleMouseExit
+      );
+
+      stateChanges = { ...stateChanges, centroidSVG: newCentroidSVG };
+    };
 
     if (reglRender) {
       if (
@@ -261,10 +350,11 @@ class Graph extends React.Component {
 
     const createToolSVG = () => {
       /* clear out whatever was on the div, even if nothing, but usually the brushes etc */
+
       d3.select("#graphAttachPoint")
         .select("svg")
         .selectAll(".lasso-svg")
-        .html(null);
+        .remove();
 
       let handleStart;
       let handleDrag;
@@ -294,78 +384,6 @@ class Graph extends React.Component {
       stateChanges = { ...stateChanges, toolSVG: newToolSVG, tool, container };
     };
 
-    const createCentroidSVG = (
-      viewportChange = false /* this should be defaulted to false
-      , but leaving it like this utill I find out how to fix */
-    ) => {
-      // Remove pre-existing SVG layer
-      d3.select("#graphAttachPoint")
-        .select("svg")
-        .style("background", null)
-        .selectAll(".centroid-label")
-        .html(null);
-
-      // If there is no currently selected cateogry for viewing
-      // Or if the graph is currently in zoom/pan mode
-      if (
-        !colorAccessor ||
-        centroidLabels.labels.length === 0 ||
-        graphInteractionMode === "zoom"
-      ) {
-        // Return without redrawing the svg layer
-        return;
-      }
-
-      // Iterate over all the key-value pairs in labels
-      // key value pair looks like:
-      // categoryValue -> [layoutX, layoutY, calculatedScreenX, calculatedScreenY]
-      const iter = centroidLabels.labels.entries();
-      let pair = iter.next().value;
-      // While there are pairs
-      while (pair) {
-        const value = pair[1];
-        // If the screen coordinates haven't been calculated
-        // or if the viewport has changed
-        if (true /* value.length < 3  */ || viewportChange) {
-          // replace indicies 2 and 3 with screen calculated coordinates
-          value.splice(2, 2, ...this.mapPointToScreen([value[0], value[1]]));
-
-          // this is temp just to see calculation circle
-
-          value.push(...this.mapPointToScreen([value[4], value[4]]));
-          value.push(...this.mapPointToScreen([value[4], value[5]]));
-        }
-        // Iterate
-        pair = iter.next().value;
-      }
-
-      const handleMouseEnter = d => {
-        dispatch({
-          type: "category value mouse hover start",
-          metadataField: colorAccessor,
-          categoryField: d.key
-        });
-      };
-
-      const handleMouseExit = d => {
-        dispatch({
-          type: "category value mouse hover end",
-          metadataField: colorAccessor,
-          categoryField: d.key
-        });
-      };
-
-      const newCentroidSVG = setupCentroidSVG(
-        responsive,
-        this.graphPaddingRight,
-        centroidLabels.labels,
-        handleMouseEnter,
-        handleMouseExit
-      );
-
-      stateChanges = { ...stateChanges, centroidSVG: newCentroidSVG };
-    };
-
     if (
       prevProps.responsive.height !== responsive.height ||
       prevProps.responsive.width !== responsive.width
@@ -382,14 +400,19 @@ class Graph extends React.Component {
     } else if (prevProps.graphInteractionMode !== graphInteractionMode) {
       // If lasso/zoom is switched
       createToolSVG();
-      // if we just switched from zoom, lets assume that the camera changed
-      createCentroidSVG(prevProps.graphInteractionMode === "zoom");
     } else if (
       centroidLabels !== prevProps.centroidLabels ||
-      (responsive.height && responsive.width && !centroidSVG)
+      (responsive.height &&
+        responsive.width &&
+        !(centroidSVG || stateChanges.centroidSVG))
     ) {
       // First time for centroid or label change
-      createCentroidSVG();
+      createCentroidSVG(prevState.cameraUpdate !== cameraUpdate);
+    } else if (
+      centroidLabels.toggle &&
+      prevState.cameraUpdate !== cameraUpdate
+    ) {
+      createCentroidSVG(true);
     }
 
     /*

@@ -10,7 +10,7 @@ const scaleSpeed = 0.5;
 const scaleMax = 3;
 const scaleMin = 1.03;
 
-function attachCamera(canvas, opts) {
+function attachCamera(canvas, opts, changeCallBack) {
   opts = opts || {};
   opts.pan = opts.pan !== false;
   opts.scale = opts.scale !== false;
@@ -30,7 +30,11 @@ function attachCamera(canvas, opts) {
     const alt = key("<shift>");
     const { height, width } = canvas;
 
+    let change = false;
+
     if (opts.rotate && mbut.left && ctrl && !alt) {
+      change = true;
+
       camera.rotate(
         [mpos.x / width - 0.5, mpos.y / height - 0.5],
         [mpos.prevX / width - 0.5, mpos.prevY / height - 0.5]
@@ -38,6 +42,8 @@ function attachCamera(canvas, opts) {
     }
 
     if ((opts.pan && mbut.right) || (mbut.left && !ctrl && !alt)) {
+      change = true;
+
       camera.pan([
         ((panSpeed * (mpos[0] - mpos.prev[0])) / width) * camera.distance,
         ((panSpeed * (mpos[1] - mpos.prev[1])) / height) * camera.distance
@@ -45,18 +51,25 @@ function attachCamera(canvas, opts) {
     }
 
     if (opts.scale && scroll[1]) {
+      change = true;
       camera.distance *= Math.exp((scroll[1] * scaleSpeed) / height);
     }
 
     if (opts.scale && (mbut.middle || (mbut.left && !ctrl && alt))) {
       const d = mpos.y - mpos.prevY;
       if (!d) return;
+      change = true;
 
       camera.distance *= Math.exp(d / height);
     }
 
     if (camera.distance > scaleMax) camera.distance = scaleMax;
     if (camera.distance < scaleMin) camera.distance = scaleMin;
+
+    if (change) {
+      console.log("change");
+      changeCallBack();
+    }
 
     scroll.flush();
     mpos.flush();
