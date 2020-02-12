@@ -11,7 +11,8 @@ export default
   colorAccessor: state.colors.colorAccessor,
   dilatedValue: state.pointDilation.categoryField,
   labels: state.centroidLabels.labels,
-  isGraphInteracting: state.graphSelection.interacting
+  isGraphInteracting: state.graphSelection.interacting,
+  graphInteractionMode: state.controls.graphInteractionMode
 }))
 class CentroidLabels extends PureComponent {
   // Check to see if centroids have either just been displayed or removed from the overlay
@@ -39,24 +40,38 @@ class CentroidLabels extends PureComponent {
       isGraphInteracting
     } = this.props;
 
-    let mouseEnterLabel;
-    let mouseExitLabel;
+    let handleLabelEvent;
 
     if (!isGraphInteracting) {
-      mouseEnterLabel = event => {
-        dispatch({
-          type: "category value mouse hover start",
-          metadataField: colorAccessor,
-          categoryField: event.target.getAttribute("data-label")
-        });
-      };
+      handleLabelEvent = event => {
+        const { graphInteractionMode } = this.props;
+        const zoomModeOn = graphInteractionMode === "zoom";
 
-      mouseExitLabel = event =>
-        dispatch({
-          type: "category value mouse hover end",
-          metadataField: colorAccessor,
-          categoryField: event.target.getAttribute("data-label")
-        });
+        if (zoomModeOn) {
+          dispatch({
+            type: "label mouse event",
+            event
+          });
+        }
+        switch (event.type) {
+          case "mouseenter":
+            dispatch({
+              type: "category value mouse hover start",
+              metadataField: colorAccessor,
+              categoryField: event.target.getAttribute("data-label")
+            });
+            break;
+          case "mouseout":
+            dispatch({
+              type: "category value mouse hover end",
+              metadataField: colorAccessor,
+              categoryField: event.target.getAttribute("data-label")
+            });
+            break;
+          default:
+            break;
+        }
+      };
     }
 
     const labelSVGs = [];
@@ -97,8 +112,10 @@ class CentroidLabels extends PureComponent {
               fill: "black",
               userSelect: "none"
             }}
-            onMouseEnter={mouseEnterLabel}
-            onMouseOut={mouseExitLabel}
+            onMouseEnter={handleLabelEvent}
+            onMouseOut={handleLabelEvent}
+            onWheel={handleLabelEvent}
+            onMouseMove={handleLabelEvent}
             pointerEvents="visiblePainted"
           >
             {label}
