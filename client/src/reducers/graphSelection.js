@@ -1,7 +1,8 @@
 const GraphSelection = (
   state = {
     tool: "lasso", // what selection tool mode (lasso, brush, ...)
-    selection: { mode: "all" } // current selection, which is tool specific
+    selection: { mode: "all" }, // current selection, which is tool specific
+    interacting: false // is the graph currently being interacted with
   },
   action
 ) => {
@@ -29,6 +30,13 @@ const GraphSelection = (
       };
     }
 
+    case "graph lasso start": {
+      return {
+        ...state,
+        interacting: true
+      };
+    }
+
     case "graph lasso end": {
       const { polygon } = action;
       return {
@@ -36,7 +44,8 @@ const GraphSelection = (
         selection: {
           mode: "within-polygon",
           polygon
-        }
+        },
+        interacting: false
       };
     }
 
@@ -48,7 +57,8 @@ const GraphSelection = (
         ...state,
         selection: {
           mode: "all"
-        }
+        },
+        interacting: false
       };
     }
 

@@ -4,12 +4,14 @@ import React, { PureComponent } from "react";
 import { connect } from "react-redux";
 
 import { categoryLabelDisplayStringLongLength } from "../../../globals";
+import { mouse } from "d3";
 
 export default
 @connect(state => ({
   colorAccessor: state.colors.colorAccessor,
   dilatedValue: state.pointDilation.categoryField,
-  labels: state.centroidLabels.labels
+  labels: state.centroidLabels.labels,
+  isGraphInteracting: state.graphSelection.interacting
 }))
 class CentroidLabels extends PureComponent {
   // Check to see if centroids have either just been displayed or removed from the overlay
@@ -33,10 +35,31 @@ class CentroidLabels extends PureComponent {
       inverseTransform,
       dilatedValue,
       dispatch,
-      colorAccessor
+      colorAccessor,
+      isGraphInteracting
     } = this.props;
 
-    const labelSVGS = [];
+    let mouseEnterLabel;
+    let mouseExitLabel;
+
+    if (!isGraphInteracting) {
+      mouseEnterLabel = event => {
+        dispatch({
+          type: "category value mouse hover start",
+          metadataField: colorAccessor,
+          categoryField: event.target.getAttribute("data-label")
+        });
+      };
+
+      mouseExitLabel = event =>
+        dispatch({
+          type: "category value mouse hover end",
+          metadataField: colorAccessor,
+          categoryField: event.target.getAttribute("data-label")
+        });
+    }
+
+    const labelSVGs = [];
     let fontSize = "15px";
     let fontWeight = null;
     labels.forEach((value, key) => {
@@ -56,7 +79,7 @@ class CentroidLabels extends PureComponent {
         )}…${key.slice(-categoryLabelDisplayStringLongLength / 2)}`;
       }
 
-      labelSVGS.push(
+      labelSVGs.push(
         <g
           // eslint-disable-next-line react/no-array-index-key
           key={key}
@@ -74,20 +97,8 @@ class CentroidLabels extends PureComponent {
               fill: "black",
               userSelect: "none"
             }}
-            onMouseEnter={e =>
-              dispatch({
-                type: "category value mouse hover start",
-                metadataField: colorAccessor,
-                categoryField: e.target.getAttribute("data-label")
-              })
-            }
-            onMouseOut={e =>
-              dispatch({
-                type: "category value mouse hover end",
-                metadataField: colorAccessor,
-                categoryField: e.target.getAttribute("data-label")
-              })
-            }
+            onMouseEnter={mouseEnterLabel}
+            onMouseOut={mouseExitLabel}
             pointerEvents="visiblePainted"
           >
             {label}
@@ -96,6 +107,6 @@ class CentroidLabels extends PureComponent {
       );
     });
 
-    return <>{labelSVGS}</>;
+    return <>{labelSVGs}</>;
   }
 }
