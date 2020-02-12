@@ -2,7 +2,17 @@ import calcCentroid from "../util/centroid";
 
 const initialState = {
   labels: [],
-  showLabels: false
+  showLabels: false,
+  // captured mouse events
+  capturedEvent: {
+    type: undefined,
+    deltaY: undefined,
+    deltaMode: undefined,
+    clientX: undefined,
+    clientY: undefined,
+    buttons: undefined,
+    preventDefault: undefined
+  }
 };
 
 const centroidLabels = (state = initialState, action, sharedNextState) => {
@@ -68,6 +78,29 @@ const centroidLabels = (state = initialState, action, sharedNextState) => {
     case "reset centroid labels":
       return initialState;
 
+    case "label mouse event": {
+      const {
+        type,
+        deltaY,
+        deltaMode,
+        clientX,
+        clientY,
+        buttons,
+        preventDefault
+      } = action.event;
+      return {
+        ...state,
+        capturedEvent: {
+          type,
+          deltaY,
+          deltaMode,
+          clientX,
+          clientY,
+          buttons,
+          preventDefault
+        }
+      };
+    }
     default:
       return state;
   }
