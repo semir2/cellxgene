@@ -250,7 +250,8 @@ class Graph extends React.Component {
       layoutChoice,
       graphInteractionMode,
       pointDilation,
-      colorAccessor
+      colorAccessor,
+      centroidLabels
     } = this.props;
     const { regl, toolSVG, camera, modelTF } = this.state;
     let stateChanges = {};
@@ -363,6 +364,12 @@ class Graph extends React.Component {
         stateChanges.tool ? stateChanges.tool : tool,
         stateChanges.container ? stateChanges.container : container
       );
+    }
+
+    if (
+      centroidLabels.capturedEvent !== prevProps.centroidLabels.capturedEvent
+    ) {
+      this.handleCanvasEvent(centroidLabels.capturedEvent);
     }
     if (Object.keys(stateChanges).length > 0) {
       this.setState(stateChanges);
