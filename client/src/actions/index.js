@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser';
 import * as globals from "../globals";
 import { Universe, MatrixFBS } from "../util/stateManager";
 import * as Dataframe from "../util/dataframe";
@@ -9,6 +10,7 @@ import {
 } from "../util/actionHelpers";
 import { PromiseLimit } from "../util/promiseLimit";
 import { requestReembed, reembedResetWorldToUniverse } from "./reembed";
+
 
 /*
 return promise to fetch the OBS annotations we need to load.  Omit anything
@@ -122,6 +124,11 @@ const doInitialDataLoad = () =>
       const stepOneResults = await Promise.all(requestJson);
       /* set config defaults */
       const config = { ...globals.configDefaults, ...stepOneResults[0].config };
+      if (config.parameters.error_aggregation) {
+        Sentry.init({
+          dsn: config.parameters.error_aggregation,
+        });
+      }
       const schema = stepOneResults[1];
       const universe = Universe.createUniverseFromResponse(config, schema);
       dispatch({
