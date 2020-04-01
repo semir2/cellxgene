@@ -19,8 +19,8 @@ from server.common.utils import sort_options
     "-e",
     default=["umap", "tsne"],
     multiple=True,
-    type=click.Choice(["umap", "tsne"]),
-    help="Embedding algorithm(s). Repeat option for multiple embeddings.",
+    type=click.Choice(["none", "umap", "tsne"]),
+    help="Embedding algorithm(s). Repeat option for multiple embeddings.  Specify 'none' to skip.",
     show_default=True,
 )
 @click.option(
@@ -175,6 +175,9 @@ def prepare(
         sc.tl.louvain(adata)
 
     def run_embedding(adata):
+        if "none" in embedding:
+            return
+
         if len(unique(adata.obs["louvain"].values)) < 10:
             palette = "tab10"
         else:
