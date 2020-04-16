@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from "@sentry/browser";
 import * as globals from "../globals";
 import { Universe, MatrixFBS } from "../util/stateManager";
 import * as Dataframe from "../util/dataframe";
@@ -174,13 +174,6 @@ const setWorldToSelection = () => (dispatch, getState) => {
     world,
     crossfilter,
   });
-};
-
-// Throws
-const dispatchExpressionErrors = (dispatch, res) => {
-  const msg = `Unexpected HTTP response while fetching expression data ${res.status}, ${res.statusText}`;
-  dispatchNetworkErrorMessageToUser(msg);
-  throw new Error(msg);
 };
 
 /* double URI encode - needed for query-param filters */
