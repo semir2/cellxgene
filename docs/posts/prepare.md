@@ -18,6 +18,32 @@ We hear you! We'd also love to be able to ingest these files directly. This isn'
 #### Can I use data hosted on the web somewhere?
 Yes! You can launch from a URL instead of a filepath. The same data format requirements apply. Please see [here](launch) for more details.
 
+# Data format options
+
+#### Category colors
+`cellxgene` will display [scanpy-style color
+information](https://github.com/chanzuckerberg/cellxgene/issues/1152#issue-564361541)
+for category-label pairs. An example of this format is shown below:
+
+```
+>>> category = "louvain"
+>>> # colors stored in adata.uns must be matplotlib-compatible color information
+>>> adata.uns[f"{category}_colors"]
+array(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#bcbd22'], dtype='<U7')
+>>> # there must be a matching category in adata.obs
+>>> category in adata.obs
+True
+```
+
+To test that you've done this properly, check that for your given `category` the number of colors match the number of category values and that the second command below results in a mapping from categories to colors.
+
+```
+>>> len(adata.obs[category].cat.categories) == len(adata.uns[f"{category}_colors"])
+True
+>>> dict(zip(adata.obs[category].cat.categories, adata.uns[f"{category}_colors"]))
+{'CD4 T cells': '#1f77b4', 'CD14+ Monocytes': '#ff7f0e', 'B cells': '#2ca02c', 'CD8 T cells': '#d62728', 'NK cells': '#9467bd', 'FCGR3A+ Monocytes': '#8c564b', 'Dendritic cells': '#e377c2', 'Megakaryocytes': '#bcbd22'}
+```
+
 # Using `cellxgene prepare`
 
 If your data is in a different format, and/or you still need to perform dimensionality reduction and/or clustering, `cellxgene` can do that for you with the `prepare` command.
